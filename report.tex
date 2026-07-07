@@ -1,0 +1,496 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{longtable}
+
+% Code snippet styling
+\lstset{
+    backgroundcolor=\color{black!5},
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    stringstyle=\color{green!60!black},
+    commentstyle=\color{gray},
+    showstringspaces=false
+}
+
+\title{\textbf{DevOps Assignment - 2} \\ \vspace{0.5cm} \large Use Case 1: Corporate Company Website Deployment \\ \vspace{0.2cm} \textit{``Automated CI/CD Pipeline with Docker, Kubernetes, Jenkins, and Monitoring''}}
+\author{
+    \textbf{Register Number:} 24BIT0379 \\
+    \textbf{Student Name:} Dhruv Jain \\
+    \textbf{Course:} IBM DevOps
+}
+\date{July 2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Mandatory Submission Links}
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|p{1cm}|p{3.5cm}|p{10cm}|}
+\hline
+\textbf{Sl. No.} & \textbf{Item} & \textbf{Link / Details} \\ \hline
+1 & GitHub Repository & \url{https://github.com/Drv4ever/24BIT0379_DhruvJain_DevOps-Project.git} \\ \hline
+2 & Jenkins Build URL & Jenkins running locally at \url{http://localhost:8080} \\ \hline
+3 & Application URL & Local: \url{http://localhost:8080} \newline Kubernetes NodePort: \url{http://localhost:30080} \\ \hline
+4 & Grafana Dashboard & \url{http://localhost:3000} (admin/admin) \\ \hline
+5 & Nagios Monitoring & \url{http://localhost:8082/nagios/} (nagiosadmin/nagiosadmin) \\ \hline
+6 & Graphite Metrics & \url{http://localhost:8000} \\ \hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\section{Introduction}
+\subsection{Use Case Overview}
+ABC Technologies has designed a new corporate website consisting of HTML, CSS, and JavaScript. The website contains multiple sections representing the enterprise. The management requires the website to be automatically deployed whenever developers update the content.
+
+A DevOps workflow has been implemented that enables:
+\begin{itemize}
+    \item Collaborative development via Git/GitHub
+    \item Automated build and deployment via Jenkins CI/CD pipeline
+    \item Containerized hosting using Docker
+    \item Orchestration using Kubernetes
+    \item Continuous monitoring via Nagios, Graphite, and Grafana
+\end{itemize}
+
+\subsection{Objectives}
+\begin{enumerate}
+    \item Enable multiple developers to collaborate on the website
+    \item Trigger automated deployment on every code update
+    \item Host the website inside a Docker container
+    \item Deploy the container in Kubernetes
+    \item Ensure website accessibility through a web browser
+    \item Monitor website availability continuously
+    \item Collect infrastructure and application metrics
+    \item Visualize website health through dashboards
+\end{enumerate}
+
+\subsection{Expected Final Output}
+\begin{itemize}
+    \item Source code stored in a Git repository
+    \item Automated build executed successfully
+    \item Docker container running
+    \item Kubernetes Pods and Services running
+    \item Website accessible through browser
+    \item Nagios displays Host UP and HTTP Service OK
+    \item Graphite receives monitoring metrics
+    \item Grafana dashboard displays CPU, Memory, Network, and Uptime
+\end{itemize}
+
+\newpage
+
+\section{Technology Stack}
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{4cm}|p{4cm}|p{7cm}|}
+\hline
+\textbf{Component} & \textbf{Technology} & \textbf{Purpose} \\ \hline
+Version Control & Git \& GitHub & Source code management and collaboration \\ \hline
+Web Server & Nginx & Static file serving \\ \hline
+Automation Script & Bash Shell & Automated Git operations \\ \hline
+Containerization & Docker & Application containerization \\ \hline
+Orchestration & Kubernetes (MicroK8s)& Container orchestration and scaling \\ \hline
+CI/CD & Jenkins & Automated build, test, and deployment pipeline \\ \hline
+Infrastructure Monitoring & Nagios & Host and service availability monitoring \\ \hline
+Metrics Collection & collectd & System metrics (CPU, memory, load) \\ \hline
+Time-Series Database & Graphite & Metrics storage and visualization \\ \hline
+Visualization & Grafana & Dashboard and analytics \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Project Structure}
+The complete project is organized into the following directory layout:
+\begin{lstlisting}[language=bash]
+24BIT0379_DhruvJain_DevOps-Project/
++-- index.html                 # Corporate Website Source Code
++-- Dockerfile                 # Docker configuration for Nginx
++-- Jenkinsfile                # Declarative Jenkins pipeline
++-- k8s-deployment.yaml        # K8s Deployment & Service Manifests
++-- push_to_github.sh          # Automation script for Git pushes
++-- monitoring/
+|   +-- docker-compose-monitoring.yml
+|   +-- nagios/                # Nagios config files
+|   |   +-- linux.cfg
+|   |   +-- commands.cfg
+|   +-- grafana/provisioning/  # Grafana auto-provisioning
+|   |   +-- datasources/graphite.yaml
+|   |   +-- dashboards/dashboards.yaml
+|   +-- collectd/              # collectd metrics sender
+|       +-- collectd-send.sh
+\end{lstlisting}
+
+\newpage
+
+\section{Git / GitHub Setup}
+\subsection{Repository Initialization}
+The project was initialized as a Git repository and pushed to GitHub for collaborative development. An automation script \texttt{push\_to\_github.sh} was created to streamline this process.
+
+\begin{lstlisting}[language=bash]
+#!/usr/bin/env bash
+set -e
+git init
+git remote add origin https://github.com/Drv4ever/24BIT0379_DhruvJain_DevOps-Project.git
+git branch -M main
+git add index.html Dockerfile k8s-deployment.yaml Jenkinsfile
+git commit -m "feat: complete Use Case 1 DevOps assignment files"
+git push -u origin main
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \rule{\textwidth}{6cm}
+    \caption{Project Repository on GitHub}
+    \label{fig:github_repo}
+\end{figure}
+
+\section{Static Web Application}
+The application is a responsive corporate landing page using modern CSS variables, glassmorphism, and custom typography (Google Fonts).
+
+\subsection{Static Website Pages}
+The website is served entirely from \texttt{index.html} covering all required sections:
+\begin{itemize}
+    \item \textbf{Home} --- Hero section, features, testimonials
+    \item \textbf{About Us} --- Company story, team section
+    \item \textbf{Services} --- Service cards
+    \item \textbf{Careers} --- Job openings
+    \item \textbf{Contact Us} --- Contact form, map
+    \item \textbf{Gallery} --- Image gallery
+\end{itemize}
+
+\newpage
+
+\section{Docker Containerization}
+\subsection{Dockerfile}
+The Dockerfile uses a lightweight \texttt{nginx:alpine} image to serve the static content efficiently.
+
+\begin{lstlisting}[language=bash]
+# Use the official lightweight Nginx Alpine image
+FROM nginx:alpine
+
+# Copy the custom corporate website index.html into Nginx web root directory
+COPY index.html /usr/share/nginx/html/index.html
+
+# Expose HTTP port 80
+EXPOSE 80
+\end{lstlisting}
+
+\subsection{Build and Run Commands}
+\begin{lstlisting}[language=bash]
+# Build the Docker image
+docker build -t drv4ever/abc-tech-website:latest .
+
+# Run the container
+docker run -d --name devops-website -p 8080:80 drv4ever/abc-tech-website:latest
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \rule{\textwidth}{6cm}
+    \caption{Docker Build and Running Container}
+    \label{fig:docker_build}
+\end{figure}
+
+\newpage
+
+\section{Kubernetes Deployment}
+\subsection{Deployment and Service Configuration}
+The Kubernetes manifest defines a Deployment running 2 replicas and a NodePort Service exposing the application on port 30080.
+
+\begin{lstlisting}[language=yaml]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abc-tech-deployment
+  labels:
+    app: abc-tech-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: abc-tech-web
+  template:
+    metadata:
+      labels:
+        app: abc-tech-web
+    spec:
+      containers:
+      - name: abc-tech-website
+        image: drv4ever/abc-tech-website:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc-tech-service
+  labels:
+    app: abc-tech-web
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080
+    protocol: TCP
+  selector:
+    app: abc-tech-web
+\end{lstlisting}
+
+\subsection{Kubernetes Commands}
+\begin{lstlisting}[language=bash]
+# Apply deployment and service
+microk8s kubectl apply -f k8s-deployment.yaml
+
+# Check pods and services
+microk8s kubectl get pods,svc
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \rule{\textwidth}{5cm}
+    \caption{Kubernetes Pods and Services Running}
+    \label{fig:k8s_pods}
+\end{figure}
+
+\newpage
+
+\section{Jenkins CI/CD Pipeline}
+\subsection{Jenkins Setup}
+Jenkins is deployed via Docker to automate the CI/CD workflow.
+
+\begin{lstlisting}[language=bash]
+docker run -d --name jenkins -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --platform linux/amd64 jenkins/jenkins:lts
+\end{lstlisting}
+
+\subsection{Declarative Pipeline (Jenkinsfile)}
+The pipeline orchestrates the checkout, build, and Kubernetes deployment stages.
+
+\begin{lstlisting}[language=groovy]
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'drv4ever/abc-tech-website:latest'
+        REPO_URL = 'https://github.com/Drv4ever/24BIT0379_DhruvJain_DevOps-Project.git'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: "${env.REPO_URL}"
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "docker build -t ${env.DOCKER_IMAGE} ."
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh "kubectl apply -f k8s-deployment.yaml"
+                sh "kubectl rollout status deployment/abc-tech-deployment"
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Pipeline Stages Overview}
+\begin{enumerate}
+    \item \textbf{Checkout:} Pulls the latest source code from the main branch on GitHub.
+    \item \textbf{Build:} Builds the Docker image locally.
+    \item \textbf{Deploy:} Applies the Kubernetes Deployment and Service manifests.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \rule{\textwidth}{6cm}
+    \caption{Jenkins Dashboard and Pipeline Execution}
+    \label{fig:jenkins_pipeline}
+\end{figure}
+
+\newpage
+
+\section{Monitoring Stack}
+The monitoring stack runs as a Docker Compose environment with four services: Graphite, Grafana, Nagios, and collectd.
+
+\subsection{Docker Compose Configuration}
+\begin{lstlisting}[language=yaml]
+services:
+  graphite:
+    image: graphiteapp/graphite-statsd:latest
+    ports:
+      - "8000:80"
+      - "2003:2003"
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+  nagios:
+    image: jasonrivers/nagios:latest
+    ports:
+      - "8082:80"
+    volumes:
+      - ./nagios/linux.cfg:/opt/nagios/etc/objects/linux.cfg
+      - ./nagios/commands.cfg:/opt/nagios/etc/objects/commands.cfg
+  collectd:
+    image: alpine:3.19
+    command: |
+      sh -c "apk add --no-cache busybox-extras && sh /config/collectd-send.sh"
+    volumes:
+      - ./collectd/collectd-send.sh:/config/collectd-send.sh
+      - /proc:/host/proc:ro
+\end{lstlisting}
+
+\subsection{Port Summary}
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Service} & \textbf{Port} & \textbf{URL} \\ \hline
+Website (K8s) & 30080 & \url{http://localhost:30080} \\ \hline
+Jenkins & 8080 & \url{http://localhost:8080} \\ \hline
+Nagios & 8082 & \url{http://localhost:8082/nagios/} \\ \hline
+Graphite & 8000 & \url{http://localhost:8000} \\ \hline
+Grafana & 3000 & \url{http://localhost:3000} \\ \hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\section{Nagios Monitoring}
+\subsection{Host and Command Configuration}
+Nagios monitors the local machine and specifically checks the Kubernetes-deployed website at \texttt{host.docker.internal:30080}.
+
+\begin{lstlisting}[language=bash]
+# linux.cfg excerpt
+define host {
+    host_name               kubernetes-host
+    address                 host.docker.internal
+    check_command           check_http_port!30080
+}
+define service {
+    host_name               kubernetes-host
+    service_description     HTTP - Website Health
+    check_command           check_http_port!30080
+}
+
+# commands.cfg excerpt
+define command {
+    command_name    check_http_port
+    command_line    /opt/nagios/libexec/check_http -H $HOSTADDRESS$ -p $ARG1$ -u /
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \rule{\textwidth}{6cm}
+    \caption{Nagios --- Host UP and Service OK}
+    \label{fig:nagios_status}
+\end{figure}
+
+\section{Graphite Metrics}
+\subsection{collectd Setup and Script}
+collectd runs in an Alpine container and pushes Host metrics to Graphite using the Carbon plaintext protocol over port 2003.
+
+\begin{figure}[H]
+    \centering
+    \rule{\textwidth}{6cm}
+    \caption{Graphite Metrics Collected}
+    \label{fig:graphite_dashboard}
+\end{figure}
+
+\newpage
+
+\section{Grafana Dashboard}
+Grafana is automatically provisioned using the Graphite datasource and displays infrastructure panels including CPU Usage, Memory Usage, Network Traffic, and System Load.
+
+\begin{figure}[H]
+    \centering
+    \rule{\textwidth}{8cm}
+    \caption{Grafana Dashboard --- Infrastructure Monitoring}
+    \label{fig:grafana_dashboard}
+\end{figure}
+
+\section{Results and Verification}
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|l|c|}
+\hline
+\textbf{Sl. No.} & \textbf{Check} & \textbf{Status} \\ \hline
+1 & GitHub repository accessible with source code & $\checkmark$ \\ \hline
+2 & Jenkins build completed successfully & $\checkmark$ \\ \hline
+3 & Docker image created successfully & $\checkmark$ \\ \hline
+4 & Kubernetes Pods and Services in Running state & $\checkmark$ \\ \hline
+5 & Application accessible in browser & $\checkmark$ \\ \hline
+6 & Nagios displays Host UP and Services OK & $\checkmark$ \\ \hline
+7 & Graphite receiving metrics & $\checkmark$ \\ \hline
+8 & Grafana dashboard displays metrics & $\checkmark$ \\ \hline
+9 & Documentation contains screenshots & $\checkmark$ \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \rule{\textwidth}{8cm}
+    \caption{Application Output --- Home Page}
+    \label{fig:app_output}
+\end{figure}
+
+\newpage
+
+\section{Conclusion}
+\subsection{Summary}
+This project successfully implements a DevOps workflow for ABC Technologies' corporate website. Key achievements include:
+\begin{itemize}
+    \item A static HTML/CSS web application hosted via Nginx
+    \item Version control management via GitHub
+    \item Container orchestration using MicroK8s with multiple replicas
+    \item Automated CI/CD pipeline using Jenkins
+    \item Complete observability suite featuring Nagios, Graphite, and Grafana
+\end{itemize}
+
+\subsection{Learning Outcomes}
+\begin{itemize}
+    \item Practical deployment of static assets using Docker
+    \item Kubernetes deployment manifests and NodePort services
+    \item Jenkins declarative pipeline scripting
+    \item Docker compose architecture for sidecar monitoring utilities
+\end{itemize}
+
+\subsection{Future Enhancements}
+\begin{itemize}
+    \item Push Docker image to Docker Hub
+    \item Implement Helm charts for dynamic Kubernetes variables
+    \item Configure centralized log aggregation (ELK Stack)
+\end{itemize}
+
+\end{document}

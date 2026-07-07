@@ -1,0 +1,42 @@
+services:
+  graphite:
+    image: graphiteapp/graphite-statsd:latest
+    ports:
+      - "8000:80"       # Web UI
+      - "2003:2003"     # Carbon plaintext
+      - "8125:8125/udp" # StatsD
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - graphite
+
+  nagios:
+    image: jasonrivers/nagios:latest
+    platform: linux/amd64
+    ports:
+      - "8082:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./nagios/linux.cfg:/opt/nagios/etc/objects/linux.cfg
+      - ./nagios/commands.cfg:/opt/nagios/etc/objects/commands.cfg
+    
+  collectd:
+    image: alpine:3.19
+    command: |
+      sh -c "apk add --no-cache busybox-extras &&
+             sh /config/collectd-send.sh"
+    volumes:
+      - ./collectd/collectd-send.sh:/config/collectd-send.sh
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    depends_on:
+      - graphite

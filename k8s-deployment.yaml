@@ -17,7 +17,7 @@ spec:
       containers:
       - name: abc-tech-website
         image: drv4ever/abc-tech-website:latest
-        imagePullPolicy: Always
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
 ---

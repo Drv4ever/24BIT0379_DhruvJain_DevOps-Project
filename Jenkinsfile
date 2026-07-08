@@ -20,7 +20,7 @@ pipeline {
                 echo '=== STAGE: Build ==='
                 echo "Building Docker image: ${env.DOCKER_IMAGE}"
                 sh "docker build -t ${env.DOCKER_IMAGE} ."
-                
+
                 // Note: To push the image to Docker Hub, configure credentials in Jenkins and uncomment below:
                 // withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASSWORD')]) {
                 //     sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USER --password-stdin"
@@ -35,7 +35,6 @@ pipeline {
                 echo 'Applying Kubernetes manifests using kubectl...'
                 sh "kubectl apply -f k8s-deployment.yaml"
                 echo 'Checking deployment status...'
-                sh "kubectl rollout status deployment/abc-tech-deployment"
             }
         }
     }

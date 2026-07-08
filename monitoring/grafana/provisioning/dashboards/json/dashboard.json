@@ -1,0 +1,74 @@
+{
+  "title": "System Health & Telemetry",
+  "tags": [],
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU Usage",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "target": "alias(collectd.docker-host.cpu.user, 'CPU User')"
+        },
+        {
+          "refId": "B",
+          "target": "alias(collectd.docker-host.cpu.system, 'CPU System')"
+        }
+      ],
+      "datasource": "Graphite"
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Consumption",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "target": "alias(collectd.docker-host.memory.used, 'Memory Used')"
+        },
+        {
+          "refId": "B",
+          "target": "alias(collectd.docker-host.memory.available, 'Memory Available')"
+        }
+      ],
+      "datasource": "Graphite"
+    },
+    {
+      "type": "timeseries",
+      "title": "System Load & Uptime Stats",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "target": "alias(collectd.docker-host.load.shortterm, 'Load 1m')"
+        },
+        {
+          "refId": "B",
+          "target": "alias(collectd.docker-host.load.midterm, 'Load 5m')"
+        }
+      ],
+      "datasource": "Graphite"
+    },
+    {
+      "type": "timeseries",
+      "title": "Network Utilization & HTTP Availability",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "target": "alias(collectd.docker-host.network.eth0.rx, 'Network RX')"
+        },
+        {
+          "refId": "B",
+          "target": "alias(collectd.docker-host.network.eth0.tx, 'Network TX')"
+        }
+      ],
+      "datasource": "Graphite"
+    }
+  ],
+  "schemaVersion": 16,
+  "version": 1,
+  "refresh": "5s"
+}
